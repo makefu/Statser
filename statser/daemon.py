@@ -32,12 +32,15 @@ class GraphiteDaemon(StatserPsutil, threading.Thread):
             self.send_graphite()
             self.clean_db()
             sleep(self.interval)
+        
 
     def stop(self):
         self.stopevent.set()
+        sleep(self.interval)
+        
 
 if __name__ == "__main__":
-    a = BasicDaemon()
+    a = GraphiteDaemon(graphite_host="127.0.0.1")
     a.start()
-    #sleep(20)
-    #a.stop()
+    sleep(1)
+    a.stop()

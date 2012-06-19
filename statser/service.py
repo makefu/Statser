@@ -1,6 +1,7 @@
 import win32serviceutil
 import win32service
 import win32event
+import servicemanager as sm
 import threading
 import os
 import sys
@@ -15,20 +16,28 @@ class ServiceLauncher(win32serviceutil.ServiceFramework):
     def __init__(self, args):
         win32serviceutil.ServiceFramework.__init__(self, args)
         self.hWaitStop = win32event.CreateEvent(None, 0, 0, None)
-        self.stopevent = threading.Event()
     
     def SvcStop(self):
         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
-        self.stopevent.set() 
+        sm.LogInfoMsg("sent stop event")
+        self.daemon.stop()
+        win32event.SetEvent(self.hWaitStop)
+        sm.LogInfoMsg("Statser - STOPPED")
+        self.ReportServiceStatus(win32service.SERVICE_STOPPED)
+
     def SvcDoRun(self):
         self.ReportServiceStatus(win32service.SERVICE_START_PENDING)
         from daemon import GraphiteDaemon
         # load config somehow
-        daemon = GraphiteDaemon()
-        daemon.start()
-        self.stopevent.wait()
-        daemon.stop()
-        self.ReportServiceStatus(win32service.SERVICE_STOPPED)
+        self.daemon = GraphiteDaemon(graphite_host="127.0.0.1")
+        sm.LogInfoMsg("Statser Started")
+        try:
+          self.daemon.start()
+          self.ReportServiceStatus(win32service.SERVICE_RUNNING)
+          win32event.WaitForSingleObject(self.hWaitStop, win32event.INFINITE)
+        except Exception,e:
+          sm.LogInfoMsg("Exception %s"%str(e))
+          self.SvcStop()
 
         
 if __name__=='__main__':
