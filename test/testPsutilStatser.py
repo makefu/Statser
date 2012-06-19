@@ -3,7 +3,7 @@ import sys
 import platform
 sys.path.append("..")
 
-from Statser import Statser
+from statser.collector import StatserPsutil as Statser
 
 class TestPsutilStatser(unittest.TestCase):
     def test_collect_disk(self):

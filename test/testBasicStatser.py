@@ -3,7 +3,7 @@ import unittest
 import sys
 sys.path.append("..")
 
-from Statser import Statser
+from statser.collector import StatserPsutil as Statser
 
 class TestBasicStatser(unittest.TestCase):
     def test_init(self):

@@ -3,9 +3,9 @@
 import platform
 import socket
 import psutil
-from time import time
+from time import time, sleep
 
-class Statser:
+class StatserPsutil:
     def __init__(self,prefix="retiolum."+platform.node(),graphite_host="localhost",graphite_port=2003,retry_limit=3):
         """
         default prefix is `hostname`
@@ -153,14 +153,14 @@ class Statser:
         self.collect_virtmem_usage()
         self.collect_disk_usage()
 
-
 if __name__ == "__main__":
     a = Statser(graphite_host="no_omo")
-    #a.connect_graphite()
+    #a.start()
+    a.connect_graphite()
     #a.collect_disk_io(["sda2"])
     #a.collect_cpu_times([1])
     a.collect_all()
     #a.to_graphite()
-    print( a._write_graphite_msg(a.db))
-    a.clean_db()
-    print(a._write_graphite_msg(a.db))
+    #print( a._write_graphite_msg(a.db))
+    #print(a._write_graphite_msg(a.db))
+
