@@ -12,6 +12,14 @@ should not be too hard to append more possible targets, even though these are
 not in scope.
 
 # Develop
+## General Development
     virtualenv .
     . bin/activate
     pip install -r deps.lst
+
+## Windows Caveats
+Statser currently only depends on `psutil`, if pip fails for you for one reason or another (e.g. requiring vc compiler),
+consider installing `psutil` by hand from [http://code.google.com/p/psutil/] and set your PATH to c:\\PythonXX\;
+
+# Testing
+  python -m unittest  discover test
