@@ -50,12 +50,19 @@ class Statser:
                 for k,v in stat._asdict().iteritems():
                     self.add_data("nic-%s.%s"%(entry,k),v)
     def collect_disk_usage(self,whitelist=[]):
+        """
+        for free disk whitelist, both mountpoint (`/`) and device (`/dev/sda1`)
+        is fine.
+        Sys-fs will be ignored by default
+
+        TODO implement the ability to get free Disk space for sysfs etc
+        """
         for partition in psutil.disk_partitions():
-            if not whitelist or partition in whitelist:
+            if not whitelist or partition.mountpoint in whitelist or partition.device in whitelist :
                 usage = psutil.disk_usage(partition.mountpoint)
-                disk_name= partition.mountpoint.replace("/","-"),
-                if disk_name == "/":
-                    disk_name="root"
+                disk_name= partition.mountpoint.replace("/","-")
+                if disk_name == "-":
+                    disk_name="-root"
                 self.add_data("df%s.total"%
                         disk_name,
                         usage.total)
