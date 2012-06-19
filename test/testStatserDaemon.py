@@ -11,6 +11,7 @@ class TestBasicStatserDaemon(unittest.TestCase):
         """
         a = BasicMessageDaemon(interval=0.5)
         a.start()
+        sleep(0.5)
         a.stop()
         self.assertFalse(a.db)
 if __name__ == '__main__':
