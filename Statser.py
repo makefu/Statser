@@ -48,7 +48,7 @@ class Statser:
         for entry,stat in stats.iteritems():
             if not whitelist or entry in whitelist:
                 for k,v in stat._asdict().iteritems():
-                    self.add_data("nic-%s.%s"%(entry,k),v)
+                    self.add_data("nic-%s.%s"%(entry.replace(" ","_"),k),v)
     def collect_disk_usage(self,whitelist=[]):
         """
         for free disk whitelist, both mountpoint (`/`) and device (`/dev/sda1`)
@@ -60,18 +60,18 @@ class Statser:
         for partition in psutil.disk_partitions():
             if not whitelist or partition.mountpoint in whitelist or partition.device in whitelist :
                 usage = psutil.disk_usage(partition.mountpoint)
-                disk_name= partition.mountpoint.replace("/","-")
-                if disk_name == "-":
-                    disk_name="-root"
+                if platform.system() == "Windows"  :
+                  disk_name= partition.mountpoint.replace("/","-")
+                  if disk_name == "-":
+                      disk_name="-root"
+                else:
+                  disk_name = "-"+partition.mountpoint.replace("\\","").replace(":","") 
                 self.add_data("df%s.total"%
-                        disk_name,
-                        usage.total)
+                        disk_name, usage.total)
                 self.add_data("df%s.used"%
-                        disk_name,
-                        usage.used)
+                        disk_name, usage.used)
                 self.add_data("df%s.free"%
-                        disk_name,
-                        usage.free)
+                        disk_name, usage.free)
  
     def connect_graphite(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
