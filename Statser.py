@@ -70,11 +70,11 @@ class Statser:
             if not whitelist or partition.mountpoint in whitelist or partition.device in whitelist :
                 usage = psutil.disk_usage(partition.mountpoint)
                 if platform.system() == "Windows"  :
+                  disk_name = "-"+partition.mountpoint.replace("\\","").replace(":","") 
+                else:
                   disk_name= partition.mountpoint.replace("/","-")
                   if disk_name == "-":
                       disk_name="-root"
-                else:
-                  disk_name = "-"+partition.mountpoint.replace("\\","").replace(":","") 
                 self.add_data("df%s.total"%
                         disk_name, usage.total)
                 self.add_data("df%s.used"%
