@@ -4,23 +4,32 @@ import platform
 import socket
 import psutil
 from time import time, sleep
+import logging as log
+log.basicConfig(filename='statser.log',level=log.DEBUG)
+
 
 class StatserPsutil:
-    def __init__(self,conf_name="",**conf):
+    def __init__(self,conf_file="",**conf):
         """
         default prefix is `hostname`
         default retry_limit is unlimited
         """
         self.db = []
 	# first load config file if possible
-	if conf_name: self.conf = self.load_json(conf_name).update(self.conf)
+	if conf_file: 
+            file_conf = self.load_json(conf_file)
+	    file_conf.update(conf)
+	    conf = file_conf
+	    
 	# then load defaults
 	if not "prefix" in conf: conf["prefix"] = "retiolum."+platform.node()
 	if not "graphite_host" in conf: conf["graphite_host"] = "localhost"
 	if not "graphite_port" in conf: conf["graphite_port"] = 2003
 	if not "retry_limit" in conf: conf["retry_limit"] = 3
 	self.conf = conf
+	log.debug("finished configuring with config :%s"%repr(self.conf))
     def load_json(self,conf_name):
+        import json
         return json.load(open(conf_name))
 	
 
@@ -108,6 +117,7 @@ class StatserPsutil:
                         disk_name, usage.free)
  
     def connect_graphite(self):
+        log.debug("connecting to %s:%d"%(self.conf["graphite_host"],self.conf["graphite_port"]))
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((self.conf["graphite_host"],self.conf["graphite_port"]))
 
@@ -131,12 +141,13 @@ class StatserPsutil:
             try:
                 l = self.sock.send(msg)
                 msg = msg[l:]
+		log.debug("finish sending message")
             except: 
-                print("Cannot send message, reconnecting...")
+                log.error("Cannot send message, reconnecting...")
                 try:
                     self.connect_graphite()
                 except:
-                    print("Cannot connect to host, retrying (%d/%d)"
+                    log.error("Cannot connect to host, retrying (%d/%d)"
                             %(tries,self.conf["retry_limit"]))
                     tries+=1
     def clean_db(self):
@@ -160,13 +171,13 @@ class StatserPsutil:
         self.collect_disk_usage()
 
 if __name__ == "__main__":
-    a = Statser(graphite_host="no_omo")
+    a = StatserPsutil(graphite_host="192.168.1.10")
     #a.start()
     a.connect_graphite()
     #a.collect_disk_io(["sda2"])
     #a.collect_cpu_times([1])
     a.collect_all()
-    #a.send_graphite()
+    a.send_graphite()
     #print( a._write_graphite_msg(a.db))
     #print(a._write_graphite_msg(a.db))
 

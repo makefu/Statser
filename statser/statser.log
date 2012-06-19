@@ -1,0 +1,2 @@
+DEBUG:root:finished configuring with config :{'prefix': 'retiolum.khan-PC', 'graphite_port': 2003, 'graphite_host': '192.168.1.10', 'retry_limit': 3}
+DEBUG:root:connecting to 192.168.1.10:2003
