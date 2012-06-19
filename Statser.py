@@ -49,6 +49,15 @@ class Statser:
             if not whitelist or entry in whitelist:
                 for k,v in stat._asdict().iteritems():
                     self.add_data("nic-%s.%s"%(entry.replace(" ","_"),k),v)
+    def collect_cpu_times(self,whitelist=[]):
+        """
+        whitelist is a list of cpus to be used, must be integer
+        """
+        stats=psutil.cpu_times(percpu=True)
+        for entry,stat in enumerate(stats):
+            if not whitelist or entry in whitelist:
+                for k,v in stat._asdict().iteritems():
+                    self.add_data("cpu%d.%s"%(entry,k),v)
     def collect_disk_usage(self,whitelist=[]):
         """
         for free disk whitelist, both mountpoint (`/`) and device (`/dev/sda1`)
@@ -114,10 +123,10 @@ class Statser:
 
 if __name__ == "__main__":
     a = Statser(prefix="balls",graphite_host="no_omo")
-    a.connect_graphite()
-    a.collect_disk_io(["sda2"])
+    #a.connect_graphite()
+    #a.collect_disk_io(["sda2"])
+    a.collect_cpu_times([1])
     a.to_graphite()
     print( a._write_graphite_msg(a.db))
     a.clean_db()
-    a.collect_iostat()
     print(a._write_graphite_msg(a.db))
