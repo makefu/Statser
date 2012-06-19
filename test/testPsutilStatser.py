@@ -26,7 +26,6 @@ class TestPsutilStatser(unittest.TestCase):
         s = Statser()
         s.collect_network_io()
         self.assertTrue(s.db)
-	print s.db
 
     def test_collect_network_whitelist(self):
         s = Statser()
