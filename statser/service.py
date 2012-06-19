@@ -12,7 +12,7 @@ import time
  
 class ServiceLauncher(win32serviceutil.ServiceFramework):
     _svc_name_ = 'Statser'
-    _svc_display_name_ ='The Stats Collector Service'
+    _svc_display_name_ ='Statser Collector Service'
     def __init__(self, args):
         win32serviceutil.ServiceFramework.__init__(self, args)
         self.hWaitStop = win32event.CreateEvent(None, 0, 0, None)
@@ -29,8 +29,10 @@ class ServiceLauncher(win32serviceutil.ServiceFramework):
         self.ReportServiceStatus(win32service.SERVICE_START_PENDING)
         from daemon import GraphiteDaemon
         # load config somehow
-        self.daemon = GraphiteDaemon(graphite_host="127.0.0.1")
-        sm.LogInfoMsg("Statser Started")
+	sm.LogInfoMsg(os.getcwd())
+	self.daemon = GraphiteDaemon(conf_file="c:\statser.json")
+	
+	sm.LogInfoMsg("Statser Started with config : %s" % str(self.daemon.conf))
         try:
           self.daemon.start()
           self.ReportServiceStatus(win32service.SERVICE_RUNNING)
