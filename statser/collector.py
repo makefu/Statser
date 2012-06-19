@@ -6,7 +6,7 @@ import psutil
 from time import time, sleep
 
 class StatserPsutil:
-    def __init__(self,prefix="retiolum."+platform.node(),graphite_host="localhost",graphite_port=2003,retry_limit=3):
+    def __init__(self,prefix="retiolum."+platform.node(),graphite_host="localhost",graphite_port=2003,retry_limit=3,**kwargs):
         """
         default prefix is `hostname`
         default retry_limit is unlimited
