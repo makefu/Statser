@@ -14,4 +14,4 @@ not in scope.
 # Develop
     virtualenv .
     . bin/activate
-    pip -r deps.lst
+    pip install -r deps.lst
