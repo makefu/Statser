@@ -12,6 +12,6 @@ should not be too hard to append more possible targets, even though these are
 not in scope.
 
 # Develop
-virtualenv .
-. bin/activate
-pip -r deps.lst
+    virtualenv .
+    . bin/activate
+    pip -r deps.lst
