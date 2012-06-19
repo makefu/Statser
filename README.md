@@ -22,4 +22,12 @@ Statser currently only depends on `psutil`, if pip fails for you for one reason 
 consider installing `psutil` by hand from [http://code.google.com/p/psutil/] and set your PATH to c:\\PythonXX\;
 
 # Testing
-  python -m unittest  discover test
+  python -m unittest discover test
+
+# Run as Windows Service
+Open Admin command shell
+
+  cd $HERE/statser
+  copy statser.json c:\
+  python service.py --startup auto install
+  python service.py start
