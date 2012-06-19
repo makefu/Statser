@@ -3,44 +3,50 @@ import threading
 import sys
 from collector import StatserPsutil
 class BasicMessageDaemon(StatserPsutil, threading.Thread):
-    def __init__(self,**kwargs):
-        StatserPsutil.__init__(self,**kwargs)
+    def __init__(self,**conf):
+        StatserPsutil.__init__(self,**conf)
         threading.Thread.__init__(self)
         self.stopevent = threading.Event()
-        self.interval=kwargs.get("interval",10) #seconds
+	if not "interval" in self.conf: self.conf["interval"] = 10#seconds
 
     def run(self):
         while not self.stopevent.isSet():
             self.collect_all()
             print self._write_graphite_msg(self.db)
             self.clean_db()
-            sleep(self.interval)
+            sleep(self.conf["interval"])
 
     def stop(self):
         self.stopevent.set()
 
 class GraphiteDaemon(StatserPsutil, threading.Thread):
-    def __init__(self,**kwargs):
-        StatserPsutil.__init__(self,**kwargs)
+    def __init__(self,**conf):
+        """
+	Graphite daemon uses:
+	   interval (default 10)
+	"""
+        StatserPsutil.__init__(self,**conf)
+	if not "interval" in self.conf: self.conf["interval"] = 10#seconds
         threading.Thread.__init__(self)
         self.stopevent = threading.Event()
-        self.interval=kwargs.get("interval",10) #seconds
+	try: self.connect_graphite()
+	except: log.error("initial connection to graphite failed...")
 
     def run(self):
         while not self.stopevent.isSet():
             self.collect_all()
             self.send_graphite()
             self.clean_db()
-            sleep(self.interval)
+            sleep(self.conf["interval"])
         
 
     def stop(self):
         self.stopevent.set()
-        sleep(self.interval)
+        sleep(self.conf["interval"])
         
 
 if __name__ == "__main__":
-    a = GraphiteDaemon(graphite_host="127.0.0.1")
+    a = GraphiteDaemon(conf_file="statser.json")
     a.start()
-    sleep(1)
+    sleep(10)
     a.stop()
