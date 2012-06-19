@@ -73,6 +73,27 @@ class TestPsutilStatser(unittest.TestCase):
         self.assertTrue(s.db)
         for e in s.db:
             self.assertTrue("cpu0" in e["name"])
+    def test_collect_uptime(self):
+        s = Statser()
+        s.collect_uptime()
+        self.assertTrue(s.db)
+
+    def test_collect_phymem(self):
+        s = Statser()
+        s.collect_phymem_usage()
+        self.assertTrue(s.db)
+
+    def test_collect_virtmem(self):
+        s = Statser()
+        s.collect_virtmem_usage()
+        self.assertTrue(s.db)
+
+    def test_collect_all(self):
+        s = Statser()
+        s.collect_all()
+        self.assertTrue(s.db)
+
+
     
 if __name__ == '__main__':
         unittest.main()
