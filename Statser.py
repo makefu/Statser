@@ -58,6 +58,25 @@ class Statser:
             if not whitelist or entry in whitelist:
                 for k,v in stat._asdict().iteritems():
                     self.add_data("cpu%d.%s"%(entry,k),v)
+    def collect_phymem_usage(self):
+        """
+        TODO skip the percentage? it can be calculated by graphite, so...
+        """
+        stats = psutil.phymem_usage()
+        for k,v in stats._asdict().iteritems():
+            self.add_data("phymem.%s"%k,v)
+    def collect_uptime(self):
+        uptime = int(time()) - int(psutil.BOOT_TIME)
+        self.add_data("uptime",uptime)
+
+    def collect_virtmem_usage(self):
+        """
+        TODO skip the percentage? it can be calculated by graphite, so...
+        """
+        stats = psutil.virtmem_usage()
+        for k,v in stats._asdict().iteritems():
+            self.add_data("virtmem.%s"%k,v)
+
     def collect_disk_usage(self,whitelist=[]):
         """
         for free disk whitelist, both mountpoint (`/`) and device (`/dev/sda1`)
@@ -121,12 +140,27 @@ class Statser:
         del (self.db)
         self.db = []
 
+    def collect_all(self):
+        """
+        TODO automagically find functions for collector
+        TODO add whitelisting feature in some cool way
+        """
+        self.collect_disk_io()
+        self.collect_cpu_times()
+        self.collect_uptime()
+        self.collect_network_io()
+        self.collect_phymem_usage()
+        self.collect_virtmem_usage()
+        self.collect_disk_usage()
+
+
 if __name__ == "__main__":
-    a = Statser(prefix="balls",graphite_host="no_omo")
+    a = Statser(graphite_host="no_omo")
     #a.connect_graphite()
     #a.collect_disk_io(["sda2"])
-    a.collect_cpu_times([1])
-    a.to_graphite()
+    #a.collect_cpu_times([1])
+    a.collect_all()
+    #a.to_graphite()
     print( a._write_graphite_msg(a.db))
     a.clean_db()
     print(a._write_graphite_msg(a.db))
