@@ -62,5 +62,17 @@ class TestPsutilStatser(unittest.TestCase):
         for e in s.db:
             self.assertTrue(needle in e["name"])
 
+    def test_collect_cpu_times(self):
+        s = Statser()
+        s.collect_cpu_times()
+        self.assertTrue(s.db)
+
+    def test_collect_cpu_times(self):
+        s = Statser()
+        s.collect_cpu_times([0])
+        self.assertTrue(s.db)
+        for e in s.db:
+            self.assertTrue("cpu0" in e["name"])
+    
 if __name__ == '__main__':
         unittest.main()
