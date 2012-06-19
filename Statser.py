@@ -27,18 +27,45 @@ class Statser:
         """
         self.db.append({"name":name,"data":data,"time":int(time())})
 
-    def collect_iostat(self,disks=[]):
+    def collect_disk_io(self,whitelist=[]):
         """
         disks is a list of disk to be collected
         if disks is empty, collect all disk io stats
+
+        TODO rewrite to avoid using private functions from psutil
         """
         stats=psutil.disk_io_counters(perdisk=True)
-        for disk,stat in stats.iteritems():
-            if not disks or disk in disks:
-                # TODO rewrite to avoid using private functions
+        for entry,stat in stats.iteritems():
+            if not whitelist or entry in whitelist:
                 for k,v in stat._asdict().iteritems():
-                    self.add_data("disk-%s.%s"%(disk,k),v)
+                    self.add_data("disk-%s.%s"%(entry,k),v)
 
+    def collect_network_io(self,whitelist=[]):
+        """
+        TODO refactor, as it is essentially copy-paste of disk_io
+        """
+        stats=psutil.network_io_counters(pernic=True)
+        for entry,stat in stats.iteritems():
+            if not whitelist or entry in whitelist:
+                for k,v in stat._asdict().iteritems():
+                    self.add_data("nic-%s.%s"%(entry,k),v)
+    def collect_disk_usage(self,whitelist=[]):
+        for partition in psutil.disk_partitions():
+            if not whitelist or partition in whitelist:
+                usage = psutil.disk_usage(partition.mountpoint)
+                disk_name= partition.mountpoint.replace("/","-"),
+                if disk_name == "/":
+                    disk_name="root"
+                self.add_data("df%s.total"%
+                        disk_name,
+                        usage.total)
+                self.add_data("df%s.used"%
+                        disk_name,
+                        usage.used)
+                self.add_data("df%s.free"%
+                        disk_name,
+                        usage.free)
+ 
     def connect_graphite(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((self.graphite_host,self.graphite_port))
@@ -81,7 +108,7 @@ class Statser:
 if __name__ == "__main__":
     a = Statser(prefix="balls",graphite_host="no_omo")
     a.connect_graphite()
-    a.collect_iostat(["sda2"])
+    a.collect_disk_io(["sda2"])
     a.to_graphite()
     print( a._write_graphite_msg(a.db))
     a.clean_db()
