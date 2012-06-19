@@ -26,16 +26,17 @@ class TestPsutilStatser(unittest.TestCase):
         s = Statser()
         s.collect_network_io()
         self.assertTrue(s.db)
+	print s.db
 
     def test_collect_network_whitelist(self):
         s = Statser()
         needle="lo"
         if platform.system() == "Windows":
-          lo="MS TCP Loopback interface"
-          needle=lo.replace(" ","_")
+          lo=["MS TCP Loopback interface","Loopback Pseudo-Interface 1"]
+          needle="Loopback"
         else:
           lo="lo"
-        s.collect_network_io([lo])
+        s.collect_network_io(lo)
         self.assertTrue(s.db)
         for e in s.db:
             self.assertTrue(needle in e["name"])
