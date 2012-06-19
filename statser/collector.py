@@ -6,17 +6,23 @@ import psutil
 from time import time, sleep
 
 class StatserPsutil:
-    def __init__(self,prefix="retiolum."+platform.node(),graphite_host="localhost",graphite_port=2003,retry_limit=3,**kwargs):
+    def __init__(self,conf_name="",**conf):
         """
         default prefix is `hostname`
         default retry_limit is unlimited
         """
         self.db = []
-        self.prefix = prefix
-        self.graphite_host=graphite_host
-        self.graphite_port=graphite_port
-        self.retry_limit=retry_limit
-
+	# first load config file if possible
+	if conf_name: self.conf = self.load_json(conf_name).update(self.conf)
+	# then load defaults
+	if not "prefix" in conf: conf["prefix"] = "retiolum."+platform.node()
+	if not "graphite_host" in conf: conf["graphite_host"] = "localhost"
+	if not "graphite_port" in conf: conf["graphite_port"] = 2003
+	if not "retry_limit" in conf: conf["retry_limit"] = 3
+	self.conf = conf
+    def load_json(self,conf_name):
+        return json.load(open(conf_name))
+	
 
     def add_data(self,name,data):
         """
@@ -103,7 +109,7 @@ class StatserPsutil:
  
     def connect_graphite(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((self.graphite_host,self.graphite_port))
+        self.sock.connect((self.conf["graphite_host"],self.conf["graphite_port"]))
 
     def _write_graphite_msg(self,db):
         """
@@ -111,7 +117,7 @@ class StatserPsutil:
         """
         msg = ""
         for e in db:
-            line = "%s.%s %s %s\r\n" %(self.prefix,e["name"],e["data"],e["time"])
+            line = "%s.%s %s %s\r\n" %(self.conf["prefix"],e["name"],e["data"],e["time"])
             msg=msg + line
         return msg
         
@@ -120,18 +126,18 @@ class StatserPsutil:
         write the collected entries to the graphite server
         """
         msg = self._write_graphite_msg(self.db)
-        tries = 0
-        while msg and tries < self.retry_limit:
+        tries = 1
+        while msg and tries <= self.conf["retry_limit"]:
             try:
                 l = self.sock.send(msg)
                 msg = msg[l:]
             except: 
                 print("Cannot send message, reconnecting...")
                 try:
-                    self.sock.connect((self.graphite_host,self.graphite_port))
+                    self.connect_graphite()
                 except:
                     print("Cannot connect to host, retrying (%d/%d)"
-                            %(tries,self.retry_limit))
+                            %(tries,self.conf["retry_limit"]))
                     tries+=1
     def clean_db(self):
         """

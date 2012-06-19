@@ -8,7 +8,7 @@ from statser.collector import StatserPsutil as Statser
 class TestBasicStatser(unittest.TestCase):
     def test_init(self):
         a = Statser(prefix="balls")
-        self.assertEqual(a.prefix,"balls")
+        self.assertEqual(a.conf["prefix"],"balls")
     def test_add_data(self):
         a = Statser()
         a.add_data("aids","balls")
