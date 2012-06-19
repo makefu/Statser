@@ -115,7 +115,7 @@ class StatserPsutil:
             msg=msg + line
         return msg
         
-    def to_graphite(self):
+    def send_graphite(self):
         """
         write the collected entries to the graphite server
         """
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     #a.collect_disk_io(["sda2"])
     #a.collect_cpu_times([1])
     a.collect_all()
-    #a.to_graphite()
+    #a.send_graphite()
     #print( a._write_graphite_msg(a.db))
     #print(a._write_graphite_msg(a.db))
 

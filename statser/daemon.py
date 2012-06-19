@@ -19,6 +19,23 @@ class BasicMessageDaemon(StatserPsutil, threading.Thread):
     def stop(self):
         self.stopevent.set()
 
+class GraphiteDaemon(StatserPsutil, threading.Thread):
+    def __init__(self,**kwargs):
+        StatserPsutil.__init__(self,**kwargs)
+        threading.Thread.__init__(self)
+        self.stopevent = threading.Event()
+        self.interval=kwargs.get("interval",10) #seconds
+
+    def run(self):
+        while not self.stopevent.isSet():
+            self.collect_all()
+            self.send_graphite()
+            self.clean_db()
+            sleep(self.interval)
+
+    def stop(self):
+        self.stopevent.set()
+
 if __name__ == "__main__":
     a = BasicDaemon()
     a.start()
