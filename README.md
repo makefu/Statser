@@ -27,7 +27,7 @@ consider installing `psutil` by hand from [http://code.google.com/p/psutil/] and
 # Run as Windows Service
 Open Admin command shell
 
-  cd $HERE/statser
-  copy statser.json c:\
-  python service.py --startup auto install
-  python service.py start
+    cd $HERE/statser
+    copy statser.json c:\
+    python service.py --startup auto install
+    python service.py start
